@@ -4,7 +4,8 @@ namespace APIServerMFE.Events
 {
 
     /******************************************************************************
-     * 
+     * event when an error occurs in MiR Fleet Integration API. This is
+     * only related to system errors that can occur when you send API requests.
      * ***************************************************************************/
     public class ErrorEvent
     {

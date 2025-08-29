@@ -3,9 +3,12 @@
 namespace APIServerMFE.Events
 {
 
-    /******************************************************************************
-     * 
-     * ***************************************************************************/
+    /*********************************************************************************
+     * receive an event when an alert is triggered in the system
+     * "DeadlockDetected": Occurs when MiR Fleet detects a deadlock in the system.
+     * "RobotError": Occurs when a connected robot reports an error.
+     * "RobotEStop": Occurs when a connected robot goes in Protective or Emergency stop
+     * ********************************************************************************/
     public class AlertEvent
     {
         [JsonPropertyName("id")]

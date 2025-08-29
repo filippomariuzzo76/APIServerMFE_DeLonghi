@@ -123,7 +123,7 @@ namespace APIServerMFE.Controllers
          * Export in Daily Mission Autocharging Log File
          * 
          * ***********************************************************************************************************************************/
-        public bool ExportDistanceMoverLogFile(RobotStateEventItem payload, IConfiguration _appSetting)
+        private bool ExportDistanceMoverLogFile(RobotStateEventItem payload, IConfiguration _appSetting)
         {
             string timestamp = DateTime.Now.ToString("yyyy-MM");
             string today = DateTime.Now.ToString("yyyy-MM-dd");

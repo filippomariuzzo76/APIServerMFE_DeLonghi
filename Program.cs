@@ -17,7 +17,7 @@ using APIServerMFE.Controllers;
 var builder = WebApplication.CreateBuilder(args);
 
 /**************************************************************************************
-* Read Configuration file appsettings.json and create appSettings  service to share 
+* Read Configuration file appsettings.json and create appSettings service to share 
 *
 ***************************************************************************************/
 //Log.Information("Start AppSettings Service");
@@ -44,10 +44,14 @@ var logger = builder.Logging.Services.BuildServiceProvider().GetRequiredService<
  * 
  * *****************************************************************************************/
 string? mfe_url = appSettings["MFEUrl"];//url mir fleet
+if (!mfe_url.StartsWith("http://") && !mfe_url.StartsWith("https://"))
+{
+    mfe_url = "http://" + mfe_url;
+}
+
 string? webhook_url = appSettings["WebHookUrl"];
 string? webhook_port = appSettings["WebHookPort"];
 string? webhook_x_api_key = appSettings["x-api-key"];//headers
-
 
 if (string.IsNullOrEmpty(mfe_url))
 {
@@ -86,12 +90,15 @@ builder.Services.AddSingleton(missionMirManager);
 // Create the service instance
 var unsubscriptionAllServiceEvent = new UnsubscriptionAllEventsService(httpClient, mfe_url, webhook_url, webhook_port, webhook_x_api_key);
 
-//Start subscription
-await unsubscriptionAllServiceEvent.SubscribeAsync();
+//unSubscription Event
+bool deleteSubscriptionAllEvents = appSettings.GetValue<bool>("Subscription_DeleteAllEvents");
+if(deleteSubscriptionAllEvents)
+{ 
+     await unsubscriptionAllServiceEvent.SubscribeAsync();
 
-//log action
-logger.LogInformation("Unsubscription ALL Events");
-
+    //log action
+    logger.LogInformation("Unsubscription ALL Events");
+}
 
 /**************************************************************************************
  * Send POST request to endpoint before start webhook server
@@ -118,15 +125,34 @@ logger.LogInformation("Subscription of Events");
  Add services to the container.
 **************************************************************************************************************************************/
 builder.Services.AddControllers();
+builder.Services.AddRazorPages();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<SerialOrderStatusService>();
 builder.Services.AddSingleton<AutochargingOrderStatusService>();
 
+builder.Services.AddHttpClient();
+
+// aggiungo HttpClient nominato "MFEUrl"
+builder.Services.AddHttpClient("MFEUrl", client =>
+{
+    var baseUrl = builder.Configuration["MFEUrl"];
+    client.BaseAddress = new Uri(baseUrl);
+});
+
 
 // Costruisci l'applicazione
 var app = builder.Build();
+
+// Redirect automatico dalla root a /missions
+app.MapGet("/", context =>
+{
+    context.Response.Redirect("/missions");
+    return Task.CompletedTask;
+});
+
+
 
 // Ottieni un logger
 //var logger = app.Services.GetRequiredService<ILogger<Program>>();
@@ -170,12 +196,13 @@ app.Use(async (context, next) =>
 //    return Results.Ok(new { message = "Evento ricevuto con successo!" + $"Tipo: {evento.Tipo}, Messaggio: {evento.Messaggio}" });
 //});
 
-
 //app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapRazorPages();
 
 app.Run();
 
