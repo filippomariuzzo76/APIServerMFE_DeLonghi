@@ -1,0 +1,10 @@
+﻿@page
+@model TestHandlerModel
+
+<form method="post" asp-page-handler="Foo">
+    @Html.AntiForgeryToken()
+    <button type="submit">Test Handler</button>
+</form>
+
+<p>@Model.Message</p>
+

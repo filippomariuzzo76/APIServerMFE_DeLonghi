@@ -8,207 +8,165 @@ using System.Text.Json;
 using APIServerMFE.Events;
 using System.Reflection;
 using APIServerMFE.Controllers;
+using System.Xml.Linq;
 
 /***************************************************************************************
- * ASP.NET Core Web
+ * ASP.NET Core Web Application Entry Point
  * 
  * ************************************************************************************/
 
 var builder = WebApplication.CreateBuilder(args);
 
 /**************************************************************************************
-* Read Configuration file appsettings.json and create appSettings service to share 
+* Load configuration from appsettings.json 
 *
 ***************************************************************************************/
-//Log.Information("Start AppSettings Service");
-var configurationBuilder = new ConfigurationBuilder()
+builder.Configuration
     .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
-IConfiguration appSettings = configurationBuilder.Build();
-builder.Services.AddSingleton(appSettings);
+// Bind configuration to strongly-typed settings
+builder.Services.Configure<AppSettings>(builder.Configuration);
 
 /*****************************************************************************************
- * Configuration of global logging 
+ * Configure Logging 
  * 
  * **************************************************************************************/
 builder.Logging.ClearProviders();
-builder.Logging.AddConsole(); // Add provider console
-builder.Logging.AddFile("Logs/app-log-{Date}.txt", minimumLevel: LogLevel.Information); // Add provider file
-
-var logger = builder.Logging.Services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();
+builder.Logging.AddConsole();
+builder.Logging.AddFile("Logs/app-log-{Date}.txt", minimumLevel: LogLevel.Information);
 
 
 /*******************************************************************************************
- * URL  
+ *  Register Services 
  * 
  * *****************************************************************************************/
-string? mfe_url = appSettings["MFEUrl"];//url mir fleet
-if (!mfe_url.StartsWith("http://") && !mfe_url.StartsWith("https://"))
-{
-    mfe_url = "http://" + mfe_url;
-}
 
-string? webhook_url = appSettings["WebHookUrl"];
-string? webhook_port = appSettings["WebHookPort"];
-string? webhook_x_api_key = appSettings["x-api-key"];//headers
-
-if (string.IsNullOrEmpty(mfe_url))
-{
-    throw new Exception("Configuration Key 'MFEUrl' not present in appsettings.json.");
-}
-else if (string.IsNullOrEmpty(webhook_url))
-{
-    throw new Exception("Configuration Key 'WebhookUrl' not present in  appsettings.json.");
-}
-
-/***************************************************************************************
- * Create receive event URL 
- * 
- * ************************************************************************************/
-
-builder.WebHost.UseUrls($"{webhook_url}:{webhook_port}");
-
-
-/***************************************************************************************
- * Define httpClient to send POST request
- * 
- * *************************************************************************************/
-var httpClient = new HttpClient();
-
-/***************************************************************************************
- * List of Mir Mission
- * ************************************************************************************/
-MissionMirManager missionMirManager = new MissionMirManager();
-builder.Services.AddSingleton(missionMirManager);
-
-
-/**************************************************************************************
- * Send POST request to endpoint before start webhook server
- * UnSubscription ALL EVENTS
- **************************************************************************************/
-// Create the service instance
-var unsubscriptionAllServiceEvent = new UnsubscriptionAllEventsService(httpClient, mfe_url, webhook_url, webhook_port, webhook_x_api_key);
-
-//unSubscription Event
-bool deleteSubscriptionAllEvents = appSettings.GetValue<bool>("Subscription_DeleteAllEvents");
-if(deleteSubscriptionAllEvents)
-{ 
-     await unsubscriptionAllServiceEvent.SubscribeAsync();
-
-    //log action
-    logger.LogInformation("Unsubscription ALL Events");
-}
-
-/**************************************************************************************
- * Send POST request to endpoint before start webhook server
- * Subscription EVENTS
- **************************************************************************************/
-bool isAlertEvent = appSettings.GetValue<bool>("Subscription_AlertEvent");
-bool isRobotRuntimeEvent = appSettings.GetValue<bool>("Subscription_RobotRuntimeEvent");
-bool isSerialOrderStatusEvent = appSettings.GetValue<bool>("Subscription_SerialOrderStatusEvent");
-bool isErrorEvent = appSettings.GetValue<bool>("Subscription_ErrorEvent");
-bool isRobotIdentityEvent = appSettings.GetValue<bool>("Subscription_RobotIdentityEvent");
-bool isRobotStateEvent = appSettings.GetValue<bool>("Subscription_RobotStateEvent");
-
- // Create the service instance
- var subscriptionServiceEvent = new SubscriptionEventsService(httpClient, mfe_url, webhook_url, webhook_port, webhook_x_api_key, isAlertEvent, isRobotRuntimeEvent,isSerialOrderStatusEvent, isErrorEvent, isRobotIdentityEvent, isRobotStateEvent);
-
- //Start subscription
- await subscriptionServiceEvent.SubscribeAsync();
-
-//log action
-logger.LogInformation("Subscription of Events");
-
-
-/**************************************************************************************************************************************
- Add services to the container.
-**************************************************************************************************************************************/
 builder.Services.AddControllers();
 builder.Services.AddRazorPages();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Domain services
+builder.Services.AddSingleton<MissionMirManager>();
 builder.Services.AddSingleton<SerialOrderStatusService>();
 builder.Services.AddSingleton<AutochargingOrderStatusService>();
 
+// Named HttpClient for MFE
+builder.Services.AddHttpClient("MFEUrl", (sp, client) =>
+{
+    var settings = sp.GetRequiredService<IConfiguration>();
+var baseUrl = settings["MFEUrl"] ?? throw new Exception("Missing configuration key 'MFEUrl'");
+client.BaseAddress = new Uri(baseUrl.StartsWith("http") ? baseUrl : $"http://{baseUrl}");
+});
+
+// Default HttpClient
 builder.Services.AddHttpClient();
 
-// aggiungo HttpClient nominato "MFEUrl"
-builder.Services.AddHttpClient("MFEUrl", client =>
-{
-    var baseUrl = builder.Configuration["MFEUrl"];
-    client.BaseAddress = new Uri(baseUrl);
-});
 
-
-// Costruisci l'applicazione
+/***************************************************************************************
+ * Build Application
+ ***************************************************************************************/
 var app = builder.Build();
 
-// Redirect automatico dalla root a /missions
-app.MapGet("/", context =>
+
+/***************************************************************************************
+ * Configure Webhook Server URL
+ ***************************************************************************************/
+var config = app.Services.GetRequiredService<IConfiguration>();
+//string webhookUrl = config["WebHookUrl"] ?? throw new Exception("Missing 'WebHookUrl'");
+//string webhookPort = config["WebHookPort"] ?? "5000"; // default if not provided
+//app.Urls.Add($"{webhookUrl}:{webhookPort}");
+
+string webhookUrl = config["WebHookUrl"] ?? "http://localhost";
+string webhookPort = config["WebHookPort"];
+
+try
 {
-    context.Response.Redirect("/missions");
-    return Task.CompletedTask;
-});
+    // Aggiungi URL solo se non stai girando sotto IIS (cioè in self-host / debug)
+    var isIIS = Environment.GetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES")?.Contains("Microsoft.AspNetCore.Server.IIS") == true;
+
+    if (!isIIS)
+    {
+        if (!string.IsNullOrWhiteSpace(webhookPort))
+            app.Urls.Add($"{webhookUrl}:{webhookPort}");
+        else
+            app.Urls.Add(webhookUrl);
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Warning: unable to set app URL ({ex.Message})");
+}
 
 
 
-// Ottieni un logger
-//var logger = app.Services.GetRequiredService<ILogger<Program>>();
+/***************************************************************************************
+ * Event Subscription / Unsubscription before starting the server
+ ***************************************************************************************/
+using (var scope = app.Services.CreateScope())
+{
+    var httpClientFactory = scope.ServiceProvider.GetRequiredService<IHttpClientFactory>();
+    var httpClient = httpClientFactory.CreateClient();
 
-/*************************************************************************************************************************************
-*  Configure the HTTP request pipeline.
-*
-*************************************************************************************************************************************/
+    string mfeUrl = config["MFEUrl"] ?? throw new Exception("Missing 'MFEUrl'");
+    string apiKey = config["x-api-key"] ?? "";
 
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    // Unsubscribe from all events if configured
+    if (config.GetValue<bool>("Subscription_DeleteAllEvents"))
+    {
+        var unsubscriptionService = new UnsubscriptionAllEventsService(httpClient, mfeUrl, webhookUrl, webhookPort, apiKey);
+        await unsubscriptionService.SubscribeAsync();
+        logger.LogInformation("Unsubscribed from all events");
+    }
+
+    // Subscribe to specific events
+    var subscriptionService = new SubscriptionEventsService(
+        httpClient, mfeUrl, webhookUrl, webhookPort, apiKey,
+        config.GetValue<bool>("Subscription_AlertEvent"),
+        config.GetValue<bool>("Subscription_RobotRuntimeEvent"),
+        config.GetValue<bool>("Subscription_SerialOrderStatusEvent"),
+        config.GetValue<bool>("Subscription_ErrorEvent"),
+        config.GetValue<bool>("Subscription_RobotIdentityEvent"),
+        config.GetValue<bool>("Subscription_RobotStateEvent")
+    );
+
+    await subscriptionService.SubscribeAsync();
+    logger.LogInformation("Subscribed to events");
+}
+
+
+/***************************************************************************************
+ * Configure HTTP Request Pipeline
+ ***************************************************************************************/
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-/**************************************************************************************************************************************
- * 
- * ***********************************************************************************************************************************/
-app.Use(async (context, next) =>
-{
-    Console.WriteLine("Event intercept on" + context.Request.Path);
-    logger.LogInformation("Intercept event on: {Path}", context.Request.Path);
-
-    context.Request.EnableBuffering();
-    var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
-    logger.LogInformation("Body of request: {Body}", body);
-    context.Request.Body.Position = 0;
-
-   // Console.WriteLine($"Richiesta ricevuta: {body}");
-    await next();
-});
-
-/**************************************************************************************************************************************
- * 
- * ***********************************************************************************************************************************/
-//app.MapPost("/event", (Evento evento) =>
-//{
-//    //Console.WriteLine($"Tipo: {evento.Tipo}, Messaggio: {evento.Messaggio}");
-//    System.Diagnostics.Debug.WriteLine($"Tipo: {evento.Tipo}, Messaggio: {evento.Messaggio}");
-
-//    return Results.Ok(new { message = "Evento ricevuto con successo!" + $"Tipo: {evento.Tipo}, Messaggio: {evento.Messaggio}" });
-//});
-
 //app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.MapRazorPages();
 
+// Redirect root -> /serialorders
+app.MapGet("/", context =>
+{
+    context.Response.Redirect("/index");
+    return Task.CompletedTask;
+});
+
+/***************************************************************************************
+ * Run the application
+ ***************************************************************************************/
 app.Run();
 
 
 /***********************************************************************************
- * 
+ * DTOs
  * *********************************************************************************/
 public class SubscriptionRequest
 {
@@ -229,4 +187,31 @@ public class Endpoint
 
     [JsonPropertyName("endpoint-paths")]
     public string[] EndpointPaths { get; set; }
+}
+
+/***************************************************************************************
+ * Strongly-typed App Settings Model
+ ***************************************************************************************/
+public class AppSettings
+{
+    public string MFEUrl { get; set; }
+    public string WebHookUrl { get; set; }
+    public string WebHookPort { get; set; }
+    public string XApiKey { get; set; }
+
+    public bool Subscription_DeleteAllEvents { get; set; }
+    public bool Subscription_AlertEvent { get; set; }
+    public bool Subscription_RobotRuntimeEvent { get; set; }
+    public bool Subscription_SerialOrderStatusEvent { get; set; }
+    public bool Subscription_ErrorEvent { get; set; }
+    public bool Subscription_RobotIdentityEvent { get; set; }
+    public bool Subscription_RobotStateEvent { get; set; }
+
+    public string Mission_WaitTest_id { get; set; }
+    public string Mission_WaitParameterTest_id { get; set; }
+
+    public string ExportDirectoryName { get; set; }
+    public string ExportFileMissionName { get; set; }
+    public string ExportFileAutochargingName { get; set; }
+    public string ExportFileDistanceName { get; set; }
 }

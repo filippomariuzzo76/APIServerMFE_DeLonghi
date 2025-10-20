@@ -1,0 +1,72 @@
+﻿@page
+@model APIServerMFE_DeLonghi.Pages.SerialOrderWaitModel
+@{
+    ViewData["Title"] = "Serial Order Wait";
+}
+
+<h3>Serial Order Wait</h3>
+
+<p>Seleziona il tempo di attesa (TimeToWait): <span id="timeDisplay">@Model.TimeToWait</span></p>
+
+<div class="btn-group mb-3">
+    <p><button type="button" id="incrementBtn">Incrementa 1s</button>
+    <button type="button" id="decrementBtn">Decrementa 1s</button></p>
+</div>
+
+<div>
+<p>
+<form method="post">
+
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="timeInput" name="TimeToWait" value="@Model.TimeToWait" />
+    <div class="mb-3">
+        <label for="priority" class="form-label">Priorità</label>
+        <select id="priority" name="Priority" class="form-select">
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+        </select>
+        <select id="missionid" name="MissionId" class="form-select">
+                <option value="905bc823-2e36-4710-9dfd-e8523b6cd98">Mission Wait</option>
+        </select>
+    </div>
+    <br/>
+
+    <button type="submit" class="btn btn-primary">Avvia Serial Order Wait</button>
+</form>
+ </p>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <p class="text-success mt-3">@Model.Message</p>
+}
+
+<div>
+    <a asp-page="/Index">Home</a>
+</div>
+
+
+<script>
+    // inizializza il contatore
+    let counter = @Model.TimeToWait;
+    const display = document.getElementById("timeDisplay");
+    const input1 = document.getElementById("timeInput");
+
+    function updateDisplay() {
+        display.textContent = counter;
+        input1.value = counter;
+    }
+
+    document.getElementById("incrementBtn").addEventListener("click", function () {
+        counter += 1;
+        updateDisplay();
+    });
+
+    document.getElementById("decrementBtn").addEventListener("click", function () {
+        if (counter > 1) counter -= 1;
+        updateDisplay();
+    });
+
+    updateDisplay(); // inizializza il display al caricamento
+</script>
