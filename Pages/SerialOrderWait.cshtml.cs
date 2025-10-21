@@ -101,17 +101,17 @@ namespace APIServerMFE_DeLonghi.Pages
                 }
             };
 
-            _logger.LogDebug("Preparazione payload missione Wait. MissionId={MissionId}, Priority={Priority}, TimeToWait={TimeToWait}",
+            _logger.LogInformation("Preparazione payload missione Wait. MissionId={MissionId}, Priority={Priority}, TimeToWait={TimeToWait}",
                                missionId, priority, timeToWait);
 
 
-            var options = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = null, // impedisce di trasformare in camelCase
-                WriteIndented = true
-            };
-
-            var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { PropertyNamingPolicy = null, WriteIndented = true });
+            // Serializza in JSON
+            var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions 
+            { 
+                PropertyNamingPolicy = null, 
+                WriteIndented = true 
+            });
+            
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             // Aggiungi l'header x-api-key
@@ -119,9 +119,10 @@ namespace APIServerMFE_DeLonghi.Pages
             _httpClient.DefaultRequestHeaders.Add("x-api-key", _settings.XApiKey);
 
             _logger.LogInformation("Invio richiesta POST a serial-order con payload: {Payload}", json);
+            _logger.LogInformation("Sto inviando x-api-key: {ApiKey}", _settings.XApiKey);
 
             // qui uso il BaseAddress dal client nominato
-            var response = await _httpClient.PostAsync("api/v1/serial-order", content);
+            var response = await _httpClient.PostAsync("/api/v1/serial-order", content);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -132,5 +133,4 @@ namespace APIServerMFE_DeLonghi.Pages
             _logger.LogInformation("Chiamata API robot completata con successo. MissionId={MissionId}", missionId);
         }
     }
-
 }//namespace

@@ -36,7 +36,6 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddFile("Logs/app-log-{Date}.txt", minimumLevel: LogLevel.Information);
 
-
 /*******************************************************************************************
  *  Register Services 
  * 
@@ -197,6 +196,7 @@ public class AppSettings
     public string MFEUrl { get; set; }
     public string WebHookUrl { get; set; }
     public string WebHookPort { get; set; }
+
     public string XApiKey { get; set; }
 
     public bool Subscription_DeleteAllEvents { get; set; }
@@ -206,10 +206,8 @@ public class AppSettings
     public bool Subscription_ErrorEvent { get; set; }
     public bool Subscription_RobotIdentityEvent { get; set; }
     public bool Subscription_RobotStateEvent { get; set; }
-
     public string Mission_WaitTest_id { get; set; }
     public string Mission_WaitParameterTest_id { get; set; }
-
     public string ExportDirectoryName { get; set; }
     public string ExportFileMissionName { get; set; }
     public string ExportFileAutochargingName { get; set; }
