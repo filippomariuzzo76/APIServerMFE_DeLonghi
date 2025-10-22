@@ -11,14 +11,13 @@ using APIServerMFE_DeLonghi.Models;
 
 namespace APIServerMFE_DeLonghi.Pages
 {
-    public class SerialOrderWaitModel: PageModel
+    public class SerialOrderWaitWithParametersModel: PageModel
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<SerialOrderWaitModel> _logger;
         private readonly AppSettings _settings;
 
-
-        public SerialOrderWaitModel(IHttpClientFactory httpClientFactory, ILogger<SerialOrderWaitModel> logger, IOptions<AppSettings> options)
+        public SerialOrderWaitWithParametersModel(IHttpClientFactory httpClientFactory, ILogger<SerialOrderWaitModel> logger, IOptions<AppSettings> options)
         {
             _httpClient = httpClientFactory.CreateClient("MFEUrl");
             _logger   = logger;
@@ -31,8 +30,39 @@ namespace APIServerMFE_DeLonghi.Pages
         [BindProperty]
         public string Priority { get; set; }
 
+        [BindProperty]
+        public List<string> CodesHU { get; set; } = new List<string>();
+
         //[BindProperty]
-        //public string MissionId { get; set; }
+        //public string CodHU1 { get; set; }
+
+        //[BindProperty]
+        //public string CodHU2 { get; set; }
+
+        //[BindProperty]
+        //public string CodHU3 { get; set; }
+
+        //[BindProperty]
+        //public string CodHU4 { get; set; }
+
+        //[BindProperty]
+        //public string CodHU5 { get; set; }
+
+        //[BindProperty]
+        //public string CodHU6 { get; set; }
+
+        //[BindProperty]
+        //public string CodHU7 { get; set; }
+
+        //[BindProperty]
+        //public string CodHU8 { get; set; }
+
+        //[BindProperty]
+        //public string CodHU9 { get; set; }
+
+        //[BindProperty]
+        //public string CodHU10 { get; set; }
+
 
         public string Message { get; set; } = "";
 
@@ -45,24 +75,23 @@ namespace APIServerMFE_DeLonghi.Pages
             if (!ModelState.IsValid)
             {
                 Message = "Errore nel binding del form!";
-                _logger.LogWarning("ModelState non valido su SerialOrderWaitModel");
+                _logger.LogWarning("ModelState non valido su SerialOrderWaitWithParametersModel");
                 return Page();
             }
        
             try
             {
-                _logger.LogInformation("Avvio missione Wait.Priority={Priority}, TimeToWait={TimeToWait}", Priority, TimeToWait);
-
-                //await StartMissionWait(MissionId, Priority, TimeToWait);
-                await StartMissionWait(Priority, TimeToWait);
+                _logger.LogInformation("Avvio missione Wait.Priority={Priority}, TimeToWait={TimeToWait}, CodiciHU={CodesHU}", Priority, TimeToWait, CodesHU);
+                
+                await StartMissionWaitWithParameters(Priority, TimeToWait, CodesHU);
                 Message = $"Missione Wait avviata! TimeToWait = {TimeToWait}";
 
-                _logger.LogInformation("Missione Wait avviata correttamente. TimeToWait={TimeToWait}", TimeToWait);
+                _logger.LogInformation("Missione Wait avviata correttamente. TimeToWait={TimeToWait}, CodiciHU={CodesHU}", TimeToWait, CodesHU);
             }
             catch (Exception ex)
             {
                 Message = $"Errore avvio missione: {ex.Message}";
-                _logger.LogError(ex, "Errore durante l'avvio della missione Wait. TimeToWait={TimeToWait}", TimeToWait);
+                _logger.LogError(ex, "Errore durante l'avvio della missione Wait. TimeToWait={TimeToWait}, CodiciHU={CodesHU}", TimeToWait, CodesHU);
             }
             return Page();
         }
@@ -71,11 +100,36 @@ namespace APIServerMFE_DeLonghi.Pages
         /**********************************************************************************************************
          * 
          **********************************************************************************************************/
-        //private async Task StartMissionWait(string missionId, string priority, int timeToWait)
-        private async Task StartMissionWait(string priority, int timeToWait)
+       
+        private async Task StartMissionWaitWithParameters(string priority, int timeToWait, List<string>CodesHU)
         {
-            string formatted = $"00:00:{timeToWait:D2}";
-            string missionId = _settings.Mission_WaitTest_id;
+            string missionId = _settings.Mission_WaitParameterTest_id;
+
+            string formattedTime = $"00:00:{timeToWait:D2}";
+
+            //add TimeToWait
+            var arguments = new List<Dictionary<string, object>>
+            {
+                new Dictionary<string, object>
+                {
+                    ["name"] = "TimeToWait",
+                    ["value"] = formattedTime
+                }
+            };
+
+            //add codici HU
+            for (int i = 0; i < CodesHU.Count; i++)
+            {
+                string asciiValue = string.Concat(CodesHU[i].Select(c => ((int)c).ToString()));
+
+                arguments.Add(new Dictionary<string, object>
+                {
+                    ["name"] = _settings.GetPLCRegister(i + 1),
+                    //["value"] = CodesHU[i]
+                    ["value"] = asciiValue
+                });
+            }
+
 
             var payload = new Dictionary<string, object>
             {
@@ -89,21 +143,15 @@ namespace APIServerMFE_DeLonghi.Pages
                        new Dictionary<string, object>
                        {
                             ["mission-id"] = missionId,
-                            ["arguments"] = new[]
-                            {
-                                new Dictionary<string, object>
-                                {
-                                    ["name"] = "TimeToWait",
-                                    ["value"] = formatted
-                                }
-                            }
+                            ["arguments"] = arguments
+                              
                        }
                     }
                 }
             };
 
-            _logger.LogInformation("Preparazione payload missione Wait. MissionId={MissionId}, Priority={Priority}, TimeToWait={TimeToWait}",
-                               missionId, priority, timeToWait);
+            _logger.LogInformation("Preparazione payload missione Wait with Parameters. MissionId={MissionId}, Priority={Priority}, TimeToWait={TimeToWait}, CodesHUt={CodesHU}",
+                               missionId, priority, timeToWait, CodesHU);
 
 
             // Serializza in JSON

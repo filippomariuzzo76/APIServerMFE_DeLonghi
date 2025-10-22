@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 
-namespace APIServerMFE.Controllers
+namespace APIServerMFE_DeLonghi.Controllers
 {
     [ApiController]
     [Route("events/alert")]

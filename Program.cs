@@ -9,6 +9,7 @@ using APIServerMFE.Events;
 using System.Reflection;
 using APIServerMFE.Controllers;
 using System.Xml.Linq;
+using APIServerMFE_DeLonghi.Models;
 
 /***************************************************************************************
  * ASP.NET Core Web Application Entry Point
@@ -40,7 +41,6 @@ builder.Logging.AddFile("Logs/app-log-{Date}.txt", minimumLevel: LogLevel.Inform
  *  Register Services 
  * 
  * *****************************************************************************************/
-
 builder.Services.AddControllers();
 builder.Services.AddRazorPages();
 builder.Services.AddEndpointsApiExplorer();
@@ -55,8 +55,8 @@ builder.Services.AddSingleton<AutochargingOrderStatusService>();
 builder.Services.AddHttpClient("MFEUrl", (sp, client) =>
 {
     var settings = sp.GetRequiredService<IConfiguration>();
-var baseUrl = settings["MFEUrl"] ?? throw new Exception("Missing configuration key 'MFEUrl'");
-client.BaseAddress = new Uri(baseUrl.StartsWith("http") ? baseUrl : $"http://{baseUrl}");
+    var baseUrl = settings["MFEUrl"] ?? throw new Exception("Missing configuration key 'MFEUrl'");
+    client.BaseAddress = new Uri(baseUrl.StartsWith("http") ? baseUrl : $"http://{baseUrl}");
 });
 
 // Default HttpClient
@@ -77,15 +77,17 @@ var config = app.Services.GetRequiredService<IConfiguration>();
 //string webhookPort = config["WebHookPort"] ?? "5000"; // default if not provided
 //app.Urls.Add($"{webhookUrl}:{webhookPort}");
 
-string webhookUrl = config["WebHookUrl"] ?? "http://localhost";
+string webhookUrl  = config["WebHookUrl"] ?? "http://localhost";
 string webhookPort = config["WebHookPort"];
+
+
 
 try
 {
     // Aggiungi URL solo se non stai girando sotto IIS (cioè in self-host / debug)
     var isIIS = Environment.GetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES")?.Contains("Microsoft.AspNetCore.Server.IIS") == true;
 
-    if (!isIIS)
+    if (!isIIS && !app.Environment.IsDevelopment())
     {
         if (!string.IsNullOrWhiteSpace(webhookPort))
             app.Urls.Add($"{webhookUrl}:{webhookPort}");
@@ -99,7 +101,6 @@ catch (Exception ex)
 }
 
 
-
 /***************************************************************************************
  * Event Subscription / Unsubscription before starting the server
  ***************************************************************************************/
@@ -109,7 +110,7 @@ using (var scope = app.Services.CreateScope())
     var httpClient = httpClientFactory.CreateClient();
 
     string mfeUrl = config["MFEUrl"] ?? throw new Exception("Missing 'MFEUrl'");
-    string apiKey = config["x-api-key"] ?? "";
+    string apiKey = config["XApiKey"] ?? "";
 
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
@@ -147,14 +148,18 @@ if (app.Environment.IsDevelopment())
 }
 
 //app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
 app.UseAuthorization();
+
 app.MapControllers();
 app.MapRazorPages();
+
 
 // Redirect root -> /serialorders
 app.MapGet("/", context =>
 {
-    context.Response.Redirect("/index");
+    context.Response.Redirect("/Index");
     return Task.CompletedTask;
 });
 
@@ -191,25 +196,32 @@ public class Endpoint
 /***************************************************************************************
  * Strongly-typed App Settings Model
  ***************************************************************************************/
-public class AppSettings
-{
-    public string MFEUrl { get; set; }
-    public string WebHookUrl { get; set; }
-    public string WebHookPort { get; set; }
+//public class AppSettings
+//{
+//    public string MFEUrl { get; set; }
+//    public string WebHookUrl { get; set; }
+//    public string WebHookPort { get; set; }
+//    public string XApiKey { get; set; }
+//    public bool Subscription_DeleteAllEvents { get; set; }
+//    public bool Subscription_AlertEvent { get; set; }
+//    public bool Subscription_RobotRuntimeEvent { get; set; }
+//    public bool Subscription_SerialOrderStatusEvent { get; set; }
+//    public bool Subscription_ErrorEvent { get; set; }
+//    public bool Subscription_RobotIdentityEvent { get; set; }
+//    public bool Subscription_RobotStateEvent { get; set; }
+//    public string Mission_WaitTest_id { get; set; }
+//    public string Mission_WaitParameterTest_id { get; set; }
+//    public string ExportDirectoryName { get; set; }
+//    public string ExportFileMissionName { get; set; }
+//    public string ExportFileAutochargingName { get; set; }
+//    public string ExportFileDistanceName { get; set; }
+//    public Dictionary<string, string> PLCRegister { get; set; } = new();
 
-    public string XApiKey { get; set; }
-
-    public bool Subscription_DeleteAllEvents { get; set; }
-    public bool Subscription_AlertEvent { get; set; }
-    public bool Subscription_RobotRuntimeEvent { get; set; }
-    public bool Subscription_SerialOrderStatusEvent { get; set; }
-    public bool Subscription_ErrorEvent { get; set; }
-    public bool Subscription_RobotIdentityEvent { get; set; }
-    public bool Subscription_RobotStateEvent { get; set; }
-    public string Mission_WaitTest_id { get; set; }
-    public string Mission_WaitParameterTest_id { get; set; }
-    public string ExportDirectoryName { get; set; }
-    public string ExportFileMissionName { get; set; }
-    public string ExportFileAutochargingName { get; set; }
-    public string ExportFileDistanceName { get; set; }
-}
+//    // Metodo helper per accedere con indice 1..10
+//    public string GetPLCRegister(int index)
+//    {
+//        if (index < 1) throw new ArgumentOutOfRangeException(nameof(index));
+//        var key = $"PLCRegister{index}";
+//        return PLCRegister.ContainsKey(key) ? PLCRegister[key] : null;
+//    }
+//}//end

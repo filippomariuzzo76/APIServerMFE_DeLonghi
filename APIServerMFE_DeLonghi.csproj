@@ -11,14 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="___Program.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="___Program.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.18" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
     <PackageReference Include="Serilog.Extensions.Logging.File" Version="3.0.0" />

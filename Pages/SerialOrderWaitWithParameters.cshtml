@@ -1,0 +1,93 @@
+﻿@page
+@model APIServerMFE_DeLonghi.Pages.SerialOrderWaitWithParametersModel
+@{
+    ViewData["Title"] = "Serial Order Wait With Parameters";
+}
+
+<h3>Serial Order Wait with Parameters</h3>
+
+<p>Seleziona il tempo di attesa (TimeToWait): <span id="timeDisplay">@Model.TimeToWait</span></p>
+
+<div class="btn-group mb-3">
+    <p><button type="button" id="incrementBtn">Incrementa 1s</button>
+    <button type="button" id="decrementBtn">Decrementa 1s</button></p>
+</div>
+
+<div>
+<p>
+<form method="post">
+
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="timeInput" name="TimeToWait" value="@Model.TimeToWait" />
+    <div class="mb-3">
+        <label for="priority" class="form-label">Priorità</label>
+        <select id="priority" name="Priority" class="form-select">
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+        </select>
+    </div>
+    <br/>
+        <div class="mb-3">
+            <label class="form-label">Codice HU Etichetta</label>
+                <br /><br />
+                <label for="Code1">Cod HU 01:</label>
+                <input type="text" name="CodesHU[0]" value="@Model.CodesHU.ElementAtOrDefault(0)" size="1 maxlength="1" value="7" placeholder="" /></br/></br/>
+                <label for="Code1">Cod HU 02:</label>
+                <input type="text" name="CodesHU[1]" value="@Model.CodesHU.ElementAtOrDefault(1)" size="1" maxlength="1" value="7" placeholder="" /></br/></br/>
+                <label for="Code1">Cod HU 03:</label>
+                <input type="text" name="CodesHU[2]" value="@Model.CodesHU.ElementAtOrDefault(2)" size="1" maxlength="1" value="8" placeholder="" /></br/></br/>
+                <label for="Code1">Cod HU 04:</label>
+                <input type="text" name="CodesHU[3]" value="@Model.CodesHU.ElementAtOrDefault(3)" size="1 maxlength="1" value="0" placeholder="" /></br/></br/>
+                <label for="Code1">Cod HU 05:</label>
+                <input type="text" name="CodesHU[4]" value="@Model.CodesHU.ElementAtOrDefault(4)" size="1 maxlength="1" value="0" placeholder="" /></br/></br/>
+                <label for="Code1">Cod HU 06:</label>
+                <input type="text" name="CodesHU[5]" value="@Model.CodesHU.ElementAtOrDefault(5)" size="1" maxlength="1" value="4" placeholder="" /></br/></br/>
+                <label for="Code1">Cod HU 07:</label>
+                <input type="text" name="CodesHU[6]" value="@Model.CodesHU.ElementAtOrDefault(6)" size="1" maxlength="1" value="3" placeholder="" /></br/></br/>
+                <label for="Code1">Cod HU 08:</label>
+                <input type="text" name="CodesHU[7]" value="@Model.CodesHU.ElementAtOrDefault(7)" size="1 maxlength="1" value="9" placeholder="" /></br/></br/>
+                <label for=" Code1">Cod HU 09:</label>
+                <input type="text" name="CodesHU[8]" value="@Model.CodesHU.ElementAtOrDefault(8)" size="1" maxlength="1" value="0" placeholder="" /></br/></br/>
+                <label for=" Code1">Cod HU 10:</label>
+                <input type="text" name="CodesHU[8]" value="@Model.CodesHU.ElementAtOrDefault(9)" size="1 maxlength="1" value="0" placeholder="" /></br/></br/>
+        </div>
+
+    <button type="submit" class="btn btn-primary">Avvia Serial Order Wait</button>
+</form>
+ </p>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <p class="text-success mt-3">@Model.Message</p>
+}
+
+<div>
+    <a asp-page="/Index">Home</a>
+</div>
+
+
+<script>
+    // inizializza il contatore
+    let counter = @Model.TimeToWait;
+    const display = document.getElementById("timeDisplay");
+    const input1 = document.getElementById("timeInput");
+
+    function updateDisplay() {
+        display.textContent = counter;
+        input1.value = counter;
+    }
+
+    document.getElementById("incrementBtn").addEventListener("click", function () {
+        counter += 1;
+        updateDisplay();
+    });
+
+    document.getElementById("decrementBtn").addEventListener("click", function () {
+        if (counter > 1) counter -= 1;
+        updateDisplay();
+    });
+
+    updateDisplay(); // inizializza il display al caricamento
+</script>
