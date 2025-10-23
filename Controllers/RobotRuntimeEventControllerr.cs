@@ -1,8 +1,8 @@
-﻿using APIServerMFE.Events;
+﻿using APIServerMFE_DeLonghi.Events;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 
-namespace APIServerMFE.Controllers
+namespace APIServerMFE_DeLonghi.Controllers
 {
     [ApiController]
     [Route("events/robotruntime")]

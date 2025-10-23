@@ -1,10 +1,10 @@
-﻿using APIServerMFE.Events;
+﻿using APIServerMFE_DeLonghi.Events;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 
-namespace APIServerMFE.Controllers
+namespace APIServerMFE_DeLonghi.Controllers
 {
     [ApiController]
     [Route("events/error")]

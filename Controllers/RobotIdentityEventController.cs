@@ -5,9 +5,9 @@ using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using System.Threading.Tasks;
-using APIServerMFE.Events;
+using APIServerMFE_DeLonghi.Events;
 
-namespace APIServerMFE.Controllers
+namespace APIServerMFE_DeLonghi.Controllers
 {
     [ApiController]
     [Route("events/robotidentity")]

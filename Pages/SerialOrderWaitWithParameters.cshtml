@@ -6,12 +6,12 @@
 
 <h3>Serial Order Wait with Parameters</h3>
 
-<p>Seleziona il tempo di attesa (TimeToWait): <span id="timeDisplay">@Model.TimeToWait</span></p>
+<p><b>Seleziona il tempo di attesa (TimeToWait): </b><span id="timeDisplay">@Model.TimeToWait</span></p>
 
 <div class="btn-group mb-3">
     <p><button type="button" id="incrementBtn">Incrementa 1s</button>
     <button type="button" id="decrementBtn">Decrementa 1s</button></p>
-</div>
+</div>  
 
 <div>
 <p>
@@ -28,32 +28,65 @@
         </select>
     </div>
     <br/>
-        <div class="mb-3">
-            <label class="form-label">Codice HU Etichetta</label>
-                <br /><br />
-                <label for="Code1">Cod HU 01:</label>
-                <input type="text" name="CodesHU[0]" value="@Model.CodesHU.ElementAtOrDefault(0)" size="1 maxlength="1" value="7" placeholder="" /></br/></br/>
-                <label for="Code1">Cod HU 02:</label>
-                <input type="text" name="CodesHU[1]" value="@Model.CodesHU.ElementAtOrDefault(1)" size="1" maxlength="1" value="7" placeholder="" /></br/></br/>
-                <label for="Code1">Cod HU 03:</label>
-                <input type="text" name="CodesHU[2]" value="@Model.CodesHU.ElementAtOrDefault(2)" size="1" maxlength="1" value="8" placeholder="" /></br/></br/>
-                <label for="Code1">Cod HU 04:</label>
-                <input type="text" name="CodesHU[3]" value="@Model.CodesHU.ElementAtOrDefault(3)" size="1 maxlength="1" value="0" placeholder="" /></br/></br/>
-                <label for="Code1">Cod HU 05:</label>
-                <input type="text" name="CodesHU[4]" value="@Model.CodesHU.ElementAtOrDefault(4)" size="1 maxlength="1" value="0" placeholder="" /></br/></br/>
-                <label for="Code1">Cod HU 06:</label>
-                <input type="text" name="CodesHU[5]" value="@Model.CodesHU.ElementAtOrDefault(5)" size="1" maxlength="1" value="4" placeholder="" /></br/></br/>
-                <label for="Code1">Cod HU 07:</label>
-                <input type="text" name="CodesHU[6]" value="@Model.CodesHU.ElementAtOrDefault(6)" size="1" maxlength="1" value="3" placeholder="" /></br/></br/>
-                <label for="Code1">Cod HU 08:</label>
-                <input type="text" name="CodesHU[7]" value="@Model.CodesHU.ElementAtOrDefault(7)" size="1 maxlength="1" value="9" placeholder="" /></br/></br/>
-                <label for=" Code1">Cod HU 09:</label>
-                <input type="text" name="CodesHU[8]" value="@Model.CodesHU.ElementAtOrDefault(8)" size="1" maxlength="1" value="0" placeholder="" /></br/></br/>
-                <label for=" Code1">Cod HU 10:</label>
-                <input type="text" name="CodesHU[8]" value="@Model.CodesHU.ElementAtOrDefault(9)" size="1 maxlength="1" value="0" placeholder="" /></br/></br/>
-        </div>
 
-    <button type="submit" class="btn btn-primary">Avvia Serial Order Wait</button>
+    <label class="form-label"><b>Codice HU Etichetta</b></label>
+    <table>
+       <tr>
+        <td>
+           <div class="mb-3">      
+                <br />
+                <label for="Code1">Cod HU 01:</label>
+                <input type="text" name="CodesHU[0]" value="@Model.CodesHU.ElementAtOrDefault(0)" size="1 maxlength="1" value="0" placeholder="" /></br/></br/>
+                <label for="Code2">Cod HU 02:</label>
+                <input type="text" name="CodesHU[1]" value="@Model.CodesHU.ElementAtOrDefault(1)" size="1" maxlength="1" value="0" placeholder="" /></br/></br/>
+                <label for="Code3">Cod HU 03:</label>
+                <input type="text" name="CodesHU[2]" value="@Model.CodesHU.ElementAtOrDefault(2)" size="1" maxlength="1" value="7" placeholder="" /></br/></br/>
+                <label for="Code4">Cod HU 04:</label>
+                <input type="text" name="CodesHU[3]" value="@Model.CodesHU.ElementAtOrDefault(3)" size="1 maxlength="1" value="7" placeholder="" /></br/></br/>
+                <label for="Code5">Cod HU 05:</label>
+                <input type="text" name="CodesHU[4]" value="@Model.CodesHU.ElementAtOrDefault(4)" size="1 maxlength="1" value="8" placeholder="" /></br/></br/>
+                <label for="Code6">Cod HU 06:</label>
+                <input type="text" name="CodesHU[5]" value="@Model.CodesHU.ElementAtOrDefault(5)" size="1" maxlength="1" value="0" placeholder="" /></br/></br/>
+                <label for="Code7">Cod HU 07:</label>
+                <input type="text" name="CodesHU[6]" value="@Model.CodesHU.ElementAtOrDefault(6)" size="1" maxlength="1" value="0" placeholder="" /></br/></br/>
+                <label for="Code8">Cod HU 08:</label>
+                <input type="text" name="CodesHU[7]" value="@Model.CodesHU.ElementAtOrDefault(7)" size="1 maxlength="1" value="4" placeholder="" /></br/></br/>
+                <label for=" Code9">Cod HU 09:</label>
+                <input type="text" name="CodesHU[8]" value="@Model.CodesHU.ElementAtOrDefault(8)" size="1" maxlength="1" value="3" placeholder="" /></br/></br/>
+                <label for=" Code10">Cod HU 10:</label>
+                <input type="text" name="CodesHU[9]" value="@Model.CodesHU.ElementAtOrDefault(9)" size="1 maxlength="1" value="9" placeholder="" /></br/></br/>
+          </div>
+      </td>
+      <td width ="30"></td>
+      <td>
+            <div class="mb-3">
+                <br /><br />
+                <label for="Code11">Cod HU 11:</label>
+                <input type="text" name="CodesHU[10]" value="@Model.CodesHU.ElementAtOrDefault(10)" size="1 maxlength="1" value="0" placeholder="" /></br/></br/>
+                <label for="Code12">Cod HU 12:</label>
+                <input type="text" name="CodesHU[11]" value="@Model.CodesHU.ElementAtOrDefault(11)" size="1" maxlength="1" value="0" placeholder="" /></br/></br/>
+                <label for="Code13">Cod HU 13:</label>
+                <input type="text" name="CodesHU[12]" value="@Model.CodesHU.ElementAtOrDefault(12)" size="1" maxlength="1" value="0" placeholder="" /></br/></br/>
+                <label for="Code14">Cod HU 14:</label>
+                <input type="text" name="CodesHU[13]" value="@Model.CodesHU.ElementAtOrDefault(13)" size="1 maxlength="1" value="1" placeholder="" /></br/></br/>
+                <label for="Code15">Cod HU 15:</label>
+                <input type="text" name="CodesHU[14]" value="@Model.CodesHU.ElementAtOrDefault(14)" size="1 maxlength="1" value="3" placeholder="" /></br/></br/>
+                <label for="Code16">Cod HU 16:</label>
+                <input type="text" name="CodesHU[15]" value="@Model.CodesHU.ElementAtOrDefault(15)" size="1" maxlength="1" value="6" placeholder="" /></br/></br/>
+                <label for="Code17">Cod HU 17:</label>
+                <input type="text" name="CodesHU[16]" value="@Model.CodesHU.ElementAtOrDefault(16)" size="1" maxlength="1" value="0" placeholder="" /></br/></br/>
+                <label for="Code18">Cod HU 18:</label>
+                <input type="text" name="CodesHU[17]" value="@Model.CodesHU.ElementAtOrDefault(17)" size="1 maxlength="1" value="7" placeholder="" /></br/></br/>
+                <label for=" Code19">Cod HU 19:</label>
+                <input type="text" name="CodesHU[18]" value="@Model.CodesHU.ElementAtOrDefault(18)" size="1" maxlength="1" value="4" placeholder="" /></br/></br/>
+                <label for=" Code20">Cod HU 20:</label>
+                <input type="text" name="CodesHU[19]" value="@Model.CodesHU.ElementAtOrDefault(19)" size="1 maxlength="1" value="5" placeholder="" /></br/></br/>
+            </div>
+        </tr>
+    </table>
+            <button type="button" id="resetBtn">Imposta tutti a 0</button>
+            <br /><br />
+            <button type="submit" class="btn btn-primary">Avvia Serial Order Wait</button>
 </form>
  </p>
 </div>
@@ -90,4 +123,11 @@
     });
 
     updateDisplay(); // inizializza il display al caricamento
+
+    document.getElementById("resetBtn").addEventListener("click", function () {
+        const inputs = document.querySelectorAll('input[name^="CodesHU"]');
+        inputs.forEach(input => input.value = "€");
+    });
+
+
 </script>

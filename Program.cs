@@ -1,15 +1,23 @@
-﻿using APIServerMFE;
+﻿using APIServerMFE_DeLonghi;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Text.Json;
-using APIServerMFE.Events;
+using APIServerMFE_DeLonghi.Events;
 using System.Reflection;
-using APIServerMFE.Controllers;
+using APIServerMFE_DeLonghi.Controllers;
 using System.Xml.Linq;
 using APIServerMFE_DeLonghi.Models;
+
+
+/**************************************************************************************
+ * Da PLC Register 50 a PLC Register 69 (20 PLCRegister) per codici HU
+ * PLCRegister 70 conferma lettua codice HU 1=ok 99=error 0=reset 
+ * PLCRegiater 71 avvio trigger lettura
+ * *************************************************************************************/
+
 
 /***************************************************************************************
  * ASP.NET Core Web Application Entry Point
@@ -80,8 +88,6 @@ var config = app.Services.GetRequiredService<IConfiguration>();
 string webhookUrl  = config["WebHookUrl"] ?? "http://localhost";
 string webhookPort = config["WebHookPort"];
 
-
-
 try
 {
     // Aggiungi URL solo se non stai girando sotto IIS (cioè in self-host / debug)
@@ -112,7 +118,8 @@ using (var scope = app.Services.CreateScope())
     string mfeUrl = config["MFEUrl"] ?? throw new Exception("Missing 'MFEUrl'");
     string apiKey = config["XApiKey"] ?? "";
 
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    //var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<SubscriptionEventsService>>();
 
     // Unsubscribe from all events if configured
     if (config.GetValue<bool>("Subscription_DeleteAllEvents"))
@@ -124,7 +131,7 @@ using (var scope = app.Services.CreateScope())
 
     // Subscribe to specific events
     var subscriptionService = new SubscriptionEventsService(
-        httpClient, mfeUrl, webhookUrl, webhookPort, apiKey,
+        logger,httpClient, mfeUrl, webhookUrl, webhookPort, apiKey,
         config.GetValue<bool>("Subscription_AlertEvent"),
         config.GetValue<bool>("Subscription_RobotRuntimeEvent"),
         config.GetValue<bool>("Subscription_SerialOrderStatusEvent"),
@@ -193,35 +200,3 @@ public class Endpoint
     public string[] EndpointPaths { get; set; }
 }
 
-/***************************************************************************************
- * Strongly-typed App Settings Model
- ***************************************************************************************/
-//public class AppSettings
-//{
-//    public string MFEUrl { get; set; }
-//    public string WebHookUrl { get; set; }
-//    public string WebHookPort { get; set; }
-//    public string XApiKey { get; set; }
-//    public bool Subscription_DeleteAllEvents { get; set; }
-//    public bool Subscription_AlertEvent { get; set; }
-//    public bool Subscription_RobotRuntimeEvent { get; set; }
-//    public bool Subscription_SerialOrderStatusEvent { get; set; }
-//    public bool Subscription_ErrorEvent { get; set; }
-//    public bool Subscription_RobotIdentityEvent { get; set; }
-//    public bool Subscription_RobotStateEvent { get; set; }
-//    public string Mission_WaitTest_id { get; set; }
-//    public string Mission_WaitParameterTest_id { get; set; }
-//    public string ExportDirectoryName { get; set; }
-//    public string ExportFileMissionName { get; set; }
-//    public string ExportFileAutochargingName { get; set; }
-//    public string ExportFileDistanceName { get; set; }
-//    public Dictionary<string, string> PLCRegister { get; set; } = new();
-
-//    // Metodo helper per accedere con indice 1..10
-//    public string GetPLCRegister(int index)
-//    {
-//        if (index < 1) throw new ArgumentOutOfRangeException(nameof(index));
-//        var key = $"PLCRegister{index}";
-//        return PLCRegister.ContainsKey(key) ? PLCRegister[key] : null;
-//    }
-//}//end

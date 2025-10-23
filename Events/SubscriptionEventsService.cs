@@ -1,4 +1,4 @@
-﻿namespace APIServerMFE.Events
+﻿namespace APIServerMFE_DeLonghi.Events
 {
     using System;
     using System.Net.Http;
@@ -10,8 +10,10 @@
      * Class implements POST Subsciption of Events on MFE server 
      * 
      * ****************************************************************************************************************************/
+
     public class SubscriptionEventsService
     {
+        private readonly ILogger<SubscriptionEventsService> _logger;
         private readonly HttpClient _httpClient;
         private readonly string _subscriptionUrl;
         private readonly string _webhookUrl;
@@ -27,8 +29,9 @@
         /***************************************************************************************************************************************
          * 
          * *************************************************************************************************************************************/
-        public SubscriptionEventsService(HttpClient httpClient, string mfeUrl, string webhookUrl, string webhookPort, string apiKey, bool isAlertEvent, bool isRobotRuntimeEvent, bool isSerialOrderStatusEvent, bool isErrorEvent, bool isRobotIdentityEvent, bool isRobotStateEvent)
+        public SubscriptionEventsService(ILogger<SubscriptionEventsService> logger, HttpClient httpClient, string mfeUrl, string webhookUrl, string webhookPort, string apiKey, bool isAlertEvent, bool isRobotRuntimeEvent, bool isSerialOrderStatusEvent, bool isErrorEvent, bool isRobotIdentityEvent, bool isRobotStateEvent)
         {
+            _logger = logger;
             _httpClient = httpClient;
             _subscriptionUrl = $"{mfeUrl}:{webhookPort}/api/v1/subscription";
             _webhookUrl = webhookUrl;
@@ -117,8 +120,8 @@
                 WriteIndented = true
             });
 
-            Console.WriteLine("JSON sent:\n" + jsonString);
-            System.Diagnostics.Debug.WriteLine("JSON sent:\n" + jsonString);
+            _logger.LogInformation("JSON sent:\n" + jsonString);
+             System.Diagnostics.Debug.WriteLine("JSON sent:\n" + jsonString);
 
 
             var jsonContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
@@ -132,12 +135,12 @@
                 var response = await _httpClient.PostAsync(_subscriptionUrl, jsonContent);
                 string responseBody = await response.Content.ReadAsStringAsync();
 
-                Console.WriteLine($"Response status: {response.StatusCode}");
-                Console.WriteLine($"Response body: {responseBody}");
+                _logger.LogInformation($"Response status: {response.StatusCode}");
+                _logger.LogInformation($"Response body: {responseBody}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error sending subscription request: {ex.Message}");
+                _logger.LogError($"Error sending subscription request: {ex.Message}");
             }
         }
     }

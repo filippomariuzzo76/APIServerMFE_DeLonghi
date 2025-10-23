@@ -6,9 +6,9 @@ using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using System.Threading.Tasks;
-using APIServerMFE.Events;
+using APIServerMFE_DeLonghi.Events;
 
-namespace APIServerMFE.Controllers
+namespace APIServerMFE_DeLonghi.Controllers
 {
     [ApiController]
     //[Route("events/serial-order-status")]
@@ -48,7 +48,7 @@ namespace APIServerMFE.Controllers
          * <returns> Risultato dell'elaborazione</returns>
          * ***************************************************************************************************/
         [HttpPost]
-         
+       
          public async Task<IActionResult> ReceiveEvent()
          {
             string timestamp = DateTime.Now.ToString("yyyy-MM-dd");

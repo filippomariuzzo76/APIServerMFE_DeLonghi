@@ -1,5 +1,5 @@
-﻿using APIServerMFE;
-using APIServerMFE.Controllers;
+﻿using APIServerMFE_DeLonghi;
+using APIServerMFE_DeLonghi.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;

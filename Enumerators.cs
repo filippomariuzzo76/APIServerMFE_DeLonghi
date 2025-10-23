@@ -1,4 +1,4 @@
-﻿namespace APIServerMFE
+﻿namespace APIServerMFE_DeLonghi
 {
     /**********************************************************************************************
      * 

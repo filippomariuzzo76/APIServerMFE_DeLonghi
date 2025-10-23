@@ -1,5 +1,5 @@
-﻿using APIServerMFE;
-using APIServerMFE.Controllers;
+﻿using APIServerMFE_DeLonghi;
+using APIServerMFE_DeLonghi.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
@@ -33,37 +33,7 @@ namespace APIServerMFE_DeLonghi.Pages
         [BindProperty]
         public List<string> CodesHU { get; set; } = new List<string>();
 
-        //[BindProperty]
-        //public string CodHU1 { get; set; }
-
-        //[BindProperty]
-        //public string CodHU2 { get; set; }
-
-        //[BindProperty]
-        //public string CodHU3 { get; set; }
-
-        //[BindProperty]
-        //public string CodHU4 { get; set; }
-
-        //[BindProperty]
-        //public string CodHU5 { get; set; }
-
-        //[BindProperty]
-        //public string CodHU6 { get; set; }
-
-        //[BindProperty]
-        //public string CodHU7 { get; set; }
-
-        //[BindProperty]
-        //public string CodHU8 { get; set; }
-
-        //[BindProperty]
-        //public string CodHU9 { get; set; }
-
-        //[BindProperty]
-        //public string CodHU10 { get; set; }
-
-
+      
         public string Message { get; set; } = "";
 
  
@@ -99,8 +69,7 @@ namespace APIServerMFE_DeLonghi.Pages
 
         /**********************************************************************************************************
          * 
-         **********************************************************************************************************/
-       
+         **********************************************************************************************************/      
         private async Task StartMissionWaitWithParameters(string priority, int timeToWait, List<string>CodesHU)
         {
             string missionId = _settings.Mission_WaitParameterTest_id;
@@ -120,12 +89,22 @@ namespace APIServerMFE_DeLonghi.Pages
             //add codici HU
             for (int i = 0; i < CodesHU.Count; i++)
             {
-                string asciiValue = string.Concat(CodesHU[i].Select(c => ((int)c).ToString()));
+                string asciiValue;
+
+                if (!string.IsNullOrEmpty(CodesHU[i]) && CodesHU[i].All(char.IsLetterOrDigit))
+                {
+                    // Se tutti i caratteri sono validi (lettera o numero), converto in ASCII
+                    asciiValue = string.Concat(CodesHU[i].Select(c => ((int)c).ToString()));
+                }
+                else
+                {
+                    // Se contiene caratteri speciali o è vuoto → scrivo "0"
+                    asciiValue = "0";
+                }
 
                 arguments.Add(new Dictionary<string, object>
                 {
                     ["name"] = _settings.GetPLCRegister(i + 1),
-                    //["value"] = CodesHU[i]
                     ["value"] = asciiValue
                 });
             }

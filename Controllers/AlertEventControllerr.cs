@@ -1,4 +1,4 @@
-﻿using APIServerMFE.Events;
+﻿using APIServerMFE_DeLonghi.Events;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text;

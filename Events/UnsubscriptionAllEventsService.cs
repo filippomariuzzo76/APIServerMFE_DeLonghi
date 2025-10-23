@@ -1,4 +1,4 @@
-﻿namespace APIServerMFE.Events
+﻿namespace APIServerMFE_DeLonghi.Events
 {
     using System;
     using System.Net.Http;
