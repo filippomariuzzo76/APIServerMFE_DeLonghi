@@ -15,10 +15,13 @@
     {
         private readonly ILogger<SubscriptionEventsService> _logger;
         private readonly HttpClient _httpClient;
-        private readonly string _subscriptionUrl;
-        private readonly string _webhookUrl;
-        private readonly string _webhookPort;
+
+        private readonly string _mfeUrl;          // URL del server MFE
+        private readonly string _subscriptionUrl;//endpoint POST per la sottoscrizione
+        private readonly string _webhookUrl; //URL del webhook
+        private readonly string _webhookPort;  // Porta webhook
         private readonly string _apiKey;
+
         private readonly bool _isAlertEvent;
         private readonly bool _isRobotRuntimeEvent;
         private readonly bool _isSerialOrderStatusEvent;
@@ -29,14 +32,31 @@
         /***************************************************************************************************************************************
          * 
          * *************************************************************************************************************************************/
-        public SubscriptionEventsService(ILogger<SubscriptionEventsService> logger, HttpClient httpClient, string mfeUrl, string webhookUrl, string webhookPort, string apiKey, bool isAlertEvent, bool isRobotRuntimeEvent, bool isSerialOrderStatusEvent, bool isErrorEvent, bool isRobotIdentityEvent, bool isRobotStateEvent)
+        public SubscriptionEventsService(
+            ILogger<SubscriptionEventsService> logger, 
+            HttpClient httpClient, 
+            string mfeUrl, 
+            string webhookUrl, 
+            string webhookPort, 
+            string apiKey, 
+            bool isAlertEvent, 
+            bool isRobotRuntimeEvent, 
+            bool isSerialOrderStatusEvent, 
+            bool isErrorEvent, 
+            bool isRobotIdentityEvent, 
+            bool isRobotStateEvent)
         {
             _logger = logger;
             _httpClient = httpClient;
-            _subscriptionUrl = $"{mfeUrl}:{webhookPort}/api/v1/subscription";
+
+            _mfeUrl = mfeUrl.TrimEnd('/');
+            //_subscriptionUrl = $"{mfeUrl}:{webhookPort}/api/v1/subscription";
+            _subscriptionUrl = $"{_mfeUrl}/api/v1/subscription";
+
             _webhookUrl = webhookUrl;
-            _webhookPort = webhookPort;
+            _webhookPort = webhookPort;           
             _apiKey = apiKey;
+
             _isAlertEvent = isAlertEvent;
             _isRobotRuntimeEvent = isRobotRuntimeEvent;
             _isSerialOrderStatusEvent = isSerialOrderStatusEvent;
@@ -120,7 +140,7 @@
                 WriteIndented = true
             });
 
-            _logger.LogInformation("JSON sent:\n" + jsonString);
+            _logger.LogInformation("SubscriptionEventsService JSON sent:\n" + jsonString);
              System.Diagnostics.Debug.WriteLine("JSON sent:\n" + jsonString);
 
 

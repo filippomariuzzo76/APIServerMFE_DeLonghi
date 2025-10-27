@@ -16,11 +16,13 @@ namespace APIServerMFE_DeLonghi.Controllers
     {
         private readonly ILogger<RobotStateEventController> _logger;
         private readonly IConfiguration _appSettings;
+        private readonly RobotEnumerators _robotEnum;
 
-        public RobotStateEventController(ILogger<RobotStateEventController> logger, IConfiguration appSettings)
+        public RobotStateEventController(ILogger<RobotStateEventController> logger, IConfiguration appSettings, RobotEnumerators robotEnum)
         {
             _logger = logger;
             _appSettings = appSettings;
+            _robotEnum = robotEnum;
         }
 
         /*****************************************************************************************************
@@ -166,7 +168,7 @@ namespace APIServerMFE_DeLonghi.Controllers
                     }
                 }
                 // Ottieni il nome del robot
-                string robotName = RobotEnumerators.GetRobotName(payload.RobotId);
+                string robotName = _robotEnum.GetRobotName(payload.RobotId);
 
                 // Calcola la distanza giornaliera rispetto al valore totale di ieri
                 double dailyDistanceToday = Math.Round(payload.TotalDistanceMovedinMeters - previousTotal);

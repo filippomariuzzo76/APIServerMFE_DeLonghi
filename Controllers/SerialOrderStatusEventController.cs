@@ -20,21 +20,22 @@ namespace APIServerMFE_DeLonghi.Controllers
         private readonly IConfiguration _appSettings;
         private readonly SerialOrderStatusService _serialOrderStatusService;
         private readonly AutochargingOrderStatusService _autochargingOrderStatusService;
-        //private string _previousSerialOrderId = null;
-        //private SerialOrderStatusEventItem _previousOrder = null;
+        private readonly RobotEnumerators _robotEnum;
 
         public SerialOrderStatusEventController(
             ILogger<SerialOrderStatusEventController> logger, 
             MissionMirManager missionManager,
             IConfiguration appSettings,
             SerialOrderStatusService serialOrderStatusService,
-            AutochargingOrderStatusService autochargingOrderStatusService)
+            AutochargingOrderStatusService autochargingOrderStatusService,
+            RobotEnumerators robotEnum)
         {
             _logger = logger;
             _missionManager = missionManager;
             _appSettings = appSettings;
             _serialOrderStatusService = serialOrderStatusService;
             _autochargingOrderStatusService = autochargingOrderStatusService;
+            _robotEnum = robotEnum;
         }
 
         /*****************************************************************************************************
@@ -96,7 +97,7 @@ namespace APIServerMFE_DeLonghi.Controllers
                 /********************************************************************************************************************************
                  * Create Export Log Missions Autocharging 
                  * *****************************************************************************************************************************/
-                 ExportAutochargingInLogFile(payload, _missionManager, _appSettings);
+                 //ExportAutochargingInLogFile(payload, _missionManager, _appSettings);
 
                 /********************************************************************************************************************************
                  * Create Log Files All Events
@@ -176,7 +177,7 @@ namespace APIServerMFE_DeLonghi.Controllers
                         statusEvent.State == Enumerators.MissionState.Aborted.ToString()))
                     {
                         MissionMir mission = _missionManager.GetMissionById(statusEvent.MissionId);
-                        string robotName = RobotEnumerators.GetRobotName(statusEvent.RobotId);
+                        string robotName = _robotEnum.GetRobotName(statusEvent.RobotId);
 
                         if (mission != null)
                         {
@@ -243,27 +244,18 @@ namespace APIServerMFE_DeLonghi.Controllers
 
                     if (autochargingOrderFound == null && statusEvent.OrderType != Enumerators.OrderType.Autocharging.ToString())
                     {
-                            string robotName = RobotEnumerators.GetRobotName(autochargingOrdersList.First().RobotId);
+                            string robotName = _robotEnum.GetRobotName(autochargingOrdersList.First().RobotId);
                             double durationMinutes = Math.Round((statusEvent.StateChangeTimestamp - autochargingOrdersList.First().StateChangeTimestamp).TotalMinutes);
+                  
 
-                        //autochargingOrderStatusBuilder_Start.AppendLine(
-                        //        $"{autochargingOrdersList.First().StateChangeTimestamp};" +  
-                        //        $"{autochargingOrdersList.First().OrderType};" +  //Type of order
-                        //        $"{""}" + //duration of autocharging
-                        //        $"{robotName};" +
-                        //        $"{autochargingOrdersList.First().SerialOrderId}");
+                            autochargingOrderStatusBuilder_End.AppendLine(
+                                         $"{statusEvent.StateChangeTimestamp};" +  //StateChangeTimestamp
+                                         $"{autochargingOrdersList.First().OrderType};" +  //Type of order
+                                         $"{durationMinutes};" + //duration of autocharging
+                                         $"{robotName};" +
+                                         $"{autochargingOrdersList.First().SerialOrderId}");
 
-                        autochargingOrderStatusBuilder_End.AppendLine(
-                                     $"{statusEvent.StateChangeTimestamp};" +  //StateChangeTimestamp
-                                     $"{autochargingOrdersList.First().OrderType};" +  //Type of order
-                                     $"{durationMinutes};" + //duration of autocharging
-                                     $"{robotName};" +
-                                     $"{autochargingOrdersList.First().SerialOrderId}");
-
-                            // Converti tutto in una singola stringa
-                            //string stringAutochargingOrderStatus_start = autochargingOrderStatusBuilder_Start.ToString();
-                            //System.IO.File.AppendAllTextAsync(filePath, stringAutochargingOrderStatus_start.TrimEnd() + Environment.NewLine).Wait();
-
+ 
                             string stringAutochargingOrderStatus_end = autochargingOrderStatusBuilder_End.ToString();
                             System.IO.File.AppendAllTextAsync(filePath, stringAutochargingOrderStatus_end.TrimEnd() + Environment.NewLine).Wait();
                         //remove from list

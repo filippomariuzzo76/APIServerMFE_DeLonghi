@@ -16,6 +16,7 @@ using APIServerMFE_DeLonghi.Models;
  * Da PLC Register 50 a PLC Register 69 (20 PLCRegister) per codici HU
  * PLCRegister 70 conferma lettua codice HU 1=ok 99=error 0=reset 
  * PLCRegiater 71 avvio trigger lettura
+ * "map-id": "cddf5c8f-1224-4dcd-b916-dc0877b28fc3",,
  * *************************************************************************************/
 
 
@@ -32,7 +33,8 @@ var builder = WebApplication.CreateBuilder(args);
 ***************************************************************************************/
 builder.Configuration
     .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddEnvironmentVariables();  // consente override via environment variables
 
 // Bind configuration to strongly-typed settings
 builder.Services.Configure<AppSettings>(builder.Configuration);
@@ -58,6 +60,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<MissionMirManager>();
 builder.Services.AddSingleton<SerialOrderStatusService>();
 builder.Services.AddSingleton<AutochargingOrderStatusService>();
+builder.Services.AddSingleton<RobotEnumerators>();
+
 
 // Named HttpClient for MFE
 builder.Services.AddHttpClient("MFEUrl", (sp, client) =>
@@ -100,6 +104,10 @@ try
         else
             app.Urls.Add(webhookUrl);
     }
+    //if (!string.IsNullOrWhiteSpace(webhookPort))d
+    //    app.Urls.Add($"{webhookUrl}:{webhookPort}");
+    //else
+    //    app.Urls.Add(webhookUrl);
 }
 catch (Exception ex)
 {
@@ -131,7 +139,12 @@ using (var scope = app.Services.CreateScope())
 
     // Subscribe to specific events
     var subscriptionService = new SubscriptionEventsService(
-        logger,httpClient, mfeUrl, webhookUrl, webhookPort, apiKey,
+        logger,
+        httpClient, 
+        mfeUrl, 
+        webhookUrl, 
+        webhookPort, 
+        apiKey,
         config.GetValue<bool>("Subscription_AlertEvent"),
         config.GetValue<bool>("Subscription_RobotRuntimeEvent"),
         config.GetValue<bool>("Subscription_SerialOrderStatusEvent"),
