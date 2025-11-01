@@ -15,6 +15,7 @@
         public bool Subscription_RobotStateEvent { get; set; }
         public string Mission_WaitTest_id { get; set; }
         public string Mission_WaitParameterTest_id { get; set; }
+        public string Mission_Transfer_With_Barcode_To_Warehouse_Ewm_id { get; set; }      
         public string ExportDirectoryName { get; set; }
         public string ExportFileMissionName { get; set; }
         public string ExportFileAutochargingName { get; set; }

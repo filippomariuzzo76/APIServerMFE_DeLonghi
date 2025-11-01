@@ -11,21 +11,27 @@ using APIServerMFE_DeLonghi.Models;
 
 namespace APIServerMFE_DeLonghi.Pages
 {
-    public class SerialOrderWaitWithParametersModel: PageModel
+    public class SerialOrderTransferWithBarcodeToWarehouseEwmModel: PageModel
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<SerialOrderWaitModel> _logger;
         private readonly AppSettings _settings;
 
-        public SerialOrderWaitWithParametersModel(IHttpClientFactory httpClientFactory, ILogger<SerialOrderWaitModel> logger, IOptions<AppSettings> options)
+        public SerialOrderTransferWithBarcodeToWarehouseEwmModel(IHttpClientFactory httpClientFactory, ILogger<SerialOrderWaitModel> logger, IOptions<AppSettings> options)
         {
             _httpClient = httpClientFactory.CreateClient("MFEUrl");
             _logger   = logger;
             _settings = options.Value;
         }
 
-        //[BindProperty]
-        //public int TimeToWait { get; set; } // valore di default
+        [BindProperty]
+        public string StartPosition { get; set; } // valore di default
+
+        [BindProperty]
+        public string StartPositionEntry { get; set; } // valore di default
+
+        [BindProperty]
+        public string EndPosition { get; set; } // valore di default
 
         [BindProperty]
         public string Priority { get; set; }
@@ -45,52 +51,63 @@ namespace APIServerMFE_DeLonghi.Pages
             if (!ModelState.IsValid)
             {
                 Message = "Errore nel binding del form!";
-                _logger.LogWarning("ModelState non valido su SerialOrderWaitWithParametersModel");
+                _logger.LogWarning("ModelState non valido su SerialOrderTransferWithBarcodeToWarehouseEwmModel");
                 return Page();
             }
        
             try
             {
-                //_logger.LogInformation("Avvio missione Wait.Priority={Priority}, TimeToWait={TimeToWait}, CodiciHU={CodesHU}", Priority, TimeToWait, CodesHU);
-                _logger.LogInformation("Avvio missione Wait.Priority={Priority}, CodiciHU={CodesHU}", Priority, CodesHU);
- 
-                //await StartMissionWaitWithParameters(Priority, TimeToWait, CodesHU);
-                await StartMissionWaitWithParameters(Priority, CodesHU);
-                Message = $"Missione Wait avviata TimeToWait with PArameters";
+                _logger.LogInformation("Avvio missione Transfer with Barcode to Warehouse.Priority={Priority},StartPosition={StartPosition},StartPositionEntry={StartPositionEntry},EndPosition={EndPosition} ,CodiciHU={CodesHU}", Priority,StartPosition,StartPositionEntry,EndPosition ,CodesHU);
+                
+                await StartMissionTransferWithBarcodeToWarehouseEwm(Priority,StartPosition,StartPositionEntry, EndPosition, CodesHU);
+                Message = $"Missione avviata Transfer With Barcode To Warehouse Ewm";
 
-                //_logger.LogInformation("Missione Wait avviata correttamente. TimeToWait={TimeToWait}, CodiciHU={CodesHU}", TimeToWait, CodesHU);
-                _logger.LogInformation("Missione Wait with Parameters avviata correttamente. CodiciHU={CodesHU}", CodesHU);
+                
+                _logger.LogInformation("Missione Transfer With Barcode To Warehouse Ewm avviata correttamente. Priority={Priority},StartPosition={StartPosition},StartPositionEntry={StartPositionEntry},EndPosition={EndPosition},CodiciHU={CodesHU}", Priority, StartPosition, StartPositionEntry, EndPosition, CodesHU);
             }
             catch (Exception ex)
             {
                 Message = $"Errore avvio missione: {ex.Message}";
-                //_logger.LogError(ex, "Errore durante l'avvio della missione Wait. TimeToWait={TimeToWait}, CodiciHU={CodesHU}", TimeToWait, CodesHU);
-                _logger.LogError(ex, "Errore durante l'avvio della missione Wait with Parameters. CodiciHU={CodesHU}", CodesHU);
+               
+                _logger.LogError(ex, "Errore durante l'avvio della missione Transfer With Barcode To Warehouse Ewm. Priority={Priority},StartPosition={StartPosition},StartPositionEntry={StartPositionEntry},EndPosition={EndPosition},CodiciHU={CodesHU}", Priority, StartPosition, StartPositionEntry, EndPosition, CodesHU);
             }
             return Page();
         }
 
 
         /**********************************************************************************************************
-         * 
-         **********************************************************************************************************/      
-        //private async Task StartMissionWaitWithParameters(string priority, int timeToWait, List<string>CodesHU)
-        private async Task StartMissionWaitWithParameters(string priority, List<string> CodesHU)
+         * EndPosition "default-value": "aa917529-241c-4a6b-80fc-90640d1cba43"
+         * StartPositionEntry "default-value": "339e7751-adb1-4f4f-9b4e-7473f281ab36",
+         * StartPosition "default-value": "339e7751-adb1-4f4f-9b4e-7473f281ab36",
+         **********************************************************************************************************/
+        private async Task StartMissionTransferWithBarcodeToWarehouseEwm(string priority, string startPosition,
+                        string startPositionEntry,string endPosition,List<string> CodesHU)
 
         {
-            string missionId = _settings.Mission_WaitParameterTest_id;
+            string missionId = _settings.Mission_Transfer_With_Barcode_To_Warehouse_Ewm_id;
 
-            //string formattedTime = $"00:00:{timeToWait:D2}";
+            var arguments = new List<Dictionary<string, object>>();
 
-            //add TimeToWait
-            var arguments = new List<Dictionary<string, object>>
+            arguments.Add(new Dictionary<string, object>
             {
-                new Dictionary<string, object>
-                {
-                    ["name"] = "TimeToWait",
-                    //["value"] = formattedTime
-                }
-            };
+                ["name"] = "StartPosition",
+                ["value"] = startPosition
+            });
+
+            //add StartPositionEntry
+            arguments.Add(new Dictionary<string, object>
+            {
+                ["name"] = "StartPositionEntry",
+                ["value"] = startPositionEntry
+                
+            });
+
+            //add EndPosition
+            arguments.Add(new Dictionary<string, object>
+            {
+                ["name"] = "EndPosition",
+                ["value"] = endPosition
+            });
 
             //add codici HU
             for (int i = 0; i < CodesHU.Count; i++)
@@ -135,10 +152,9 @@ namespace APIServerMFE_DeLonghi.Pages
                 }
             };
 
-            //_logger.LogInformation("Preparazione payload missione Wait with Parameters. MissionId={MissionId}, Priority={Priority}, TimeToWait={TimeToWait}, CodesHUt={CodesHU}",
-            //                   missionId, priority, timeToWait, CodesHU);
-            _logger.LogInformation("Preparazione payload missione Wait with Parameters. MissionId={MissionId}, Priority={Priority}, CodesHUt={CodesHU}",
-                                           missionId, priority, CodesHU);
+
+            _logger.LogInformation("Preparazione payload missione Transfer With Barcode Warehouse Ewm. MissionId={MissionId}, Priority={Priority},StartPosition={StartPosition},StartPositionEntry={StartPositionEntry},EndPosition={EndPosition} CodesHU={CodesHU}",
+                                           missionId, priority,startPosition, startPositionEntry,endPosition,CodesHU);
 
             // Serializza in JSON
             var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions 

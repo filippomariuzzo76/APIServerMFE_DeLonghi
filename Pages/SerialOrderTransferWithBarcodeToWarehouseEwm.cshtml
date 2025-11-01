@@ -1,24 +1,16 @@
 ﻿@page
-@model APIServerMFE_DeLonghi.Pages.SerialOrderWaitWithParametersModel
+@model APIServerMFE_DeLonghi.Pages.SerialOrderTransferWithBarcodeToWarehouseEwmModel 
 @{
-    ViewData["Title"] = "Set HU Parameters";
+    ViewData["Title"] = "Serial Order Transfer With Barcode To Warehouse Ewm";
 }
 
-<h3>Serial Order Set HU Parameters</h3>
+<h3>Serial Order Transfer With Barcode To Warehouse Ewm</h3>
 
-@* <p><b>Seleziona il tempo di attesa (TimeToWait): </b><span id="timeDisplay">@Model.TimeToWait</span></p> *@
-
-<div class="btn-group mb-3">
-    <p><button type="button" id="incrementBtn">Incrementa 1s</button>
-    <button type="button" id="decrementBtn">Decrementa 1s</button></p>
-</div>  
-
-<div>
 <p>
 <form method="post">
 
     @Html.AntiForgeryToken()
-    @* <input type="hidden" id="timeInput" name="TimeToWait" value="@Model.TimeToWait" /> *@
+    
     <div class="mb-3">
         <label for="priority" class="form-label">Priorità</label>
         <select id="priority" name="Priority" class="form-select">
@@ -28,7 +20,16 @@
         </select>
     </div>
     <br/>
-
+    <div>
+            <label class="form-label"><b>Posizioni Start e End</b></label></br/></br/>
+            <label for="Code1">Start Position</label>
+            <input type="text" size="40" id="startPosition" name="StartPosition" value='@(Model.StartPosition ?? "339e7751-adb1-4f4f-9b4e-7473f281ab36")' /></br/></br/>
+            <label for="Code1">Start Position Entry</label>
+            <input type="text" size="40" id="startPositionEntry" name="StartPositionEntry" value='@(Model.StartPositionEntry ?? "339e7751-adb1-4f4f-9b4e-7473f281ab36")' /></br/></br/>
+            <label for="Code1">End Position</label>
+            <input type="text" size="40" id="endPosition" name="EndPosition" value='@(Model.EndPosition ?? "aa917529-241c-4a6b-80fc-90640d1cba43")' /></br/></br/>
+    </div>
+        
     <label class="form-label"><b>Codice HU Etichetta</b></label>
     <table>
        <tr>
@@ -86,7 +87,7 @@
     </table>
             <button type="button" id="resetBtn">Imposta tutti a 0</button>
             <br /><br />
-            <button type="submit" class="btn btn-primary">Avvia Serial Order Wait</button>
+            <button type="submit" class="btn btn-primary">Avvia Serial Transfer </button>
 </form>
  </p>
 </div>
@@ -101,33 +102,4 @@
 </div>
 
 
-<script>
-     //inizializza il contatore
-    @* let counter = @Model.TimeToWait;*@
-    const display = document.getElementById("timeDisplay");
-    const input1 = document.getElementById("timeInput");
 
-    function updateDisplay() {
-        display.textContent = counter;
-        input1.value = counter;
-    }
-
-    document.getElementById("incrementBtn").addEventListener("click", function () {
-        counter += 1;
-        updateDisplay();
-    });
-
-    document.getElementById("decrementBtn").addEventListener("click", function () {
-        if (counter > 1) counter -= 1;
-        updateDisplay();
-    });
-
-    updateDisplay(); // inizializza il display al caricamento
-
-    document.getElementById("resetBtn").addEventListener("click", function () {
-        const inputs = document.querySelectorAll('input[name^="CodesHU"]');
-        inputs.forEach(input => input.value = "€");
-    });
-
-
-</script>
