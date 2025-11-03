@@ -85,6 +85,7 @@ namespace APIServerMFE_DeLonghi.Pages
 
         {
             string missionId = _settings.Mission_Transfer_With_Barcode_To_Warehouse_Ewm_id;
+            string serialOrderId = $"{DateTime.UtcNow:yyyyMMddHHmmssfff}-{Guid.NewGuid().ToString("N").Substring(0, 6)}";
 
             var arguments = new List<Dictionary<string, object>>();
 
@@ -137,7 +138,7 @@ namespace APIServerMFE_DeLonghi.Pages
             {
                 ["serial-order"] = new Dictionary<string, object>
                 {
-                    ["id"] = missionId,
+                    ["id"] = serialOrderId,
                     ["priority"] = priority,
                     ["earliest-start-time"] = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss") + "Z",
                     ["phases"] = new[]
