@@ -104,10 +104,7 @@ try
         else
             app.Urls.Add(webhookUrl);
     }
-    //if (!string.IsNullOrWhiteSpace(webhookPort))d
-    //    app.Urls.Add($"{webhookUrl}:{webhookPort}");
-    //else
-    //    app.Urls.Add(webhookUrl);
+
 }
 catch (Exception ex)
 {
@@ -150,7 +147,8 @@ using (var scope = app.Services.CreateScope())
         config.GetValue<bool>("Subscription_SerialOrderStatusEvent"),
         config.GetValue<bool>("Subscription_ErrorEvent"),
         config.GetValue<bool>("Subscription_RobotIdentityEvent"),
-        config.GetValue<bool>("Subscription_RobotStateEvent")
+        config.GetValue<bool>("Subscription_RobotStateEvent"),
+        config.GetValue<bool>("Subscription_ReaderBarcodeResultEvent")
     );
 
     await subscriptionService.SubscribeAsync();

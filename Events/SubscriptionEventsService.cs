@@ -28,6 +28,7 @@
         private readonly bool _isErrorEvent;
         private readonly bool _isRobotIdentityEvent;
         private readonly bool _isRobotStateEvent;
+        private readonly bool _isReaderBarcodeResultEvent;
 
         /***************************************************************************************************************************************
          * 
@@ -44,7 +45,8 @@
             bool isSerialOrderStatusEvent, 
             bool isErrorEvent, 
             bool isRobotIdentityEvent, 
-            bool isRobotStateEvent)
+            bool isRobotStateEvent,
+            bool isReaderBarcodeResultEvent)
         {
             _logger = logger;
             _httpClient = httpClient;
@@ -63,6 +65,7 @@
             _isErrorEvent = isErrorEvent;
             _isRobotIdentityEvent = isRobotIdentityEvent;
             _isRobotStateEvent = isRobotStateEvent;
+            _isReaderBarcodeResultEvent = isReaderBarcodeResultEvent;
         }
 
         /************************************************************************************
@@ -126,12 +129,20 @@
                 });
             }
 
+            if (_isReaderBarcodeResultEvent)
+            {
+                endpoints.Add(new Endpoint
+                {
+                    EventType = "Payload",
+                    EndpointPaths = new[] { "events/readerbarcoderesult" }
+                });
+            }
+
             var postData = new SubscriptionRequest
             {
                 BaseUrl = $"{_webhookUrl}:{_webhookPort}",
                 IgnoreCertificateError = true,
-                Endpoints = endpoints.ToArray()
-                
+                Endpoints = endpoints.ToArray()               
             };
 
             var jsonString = JsonSerializer.Serialize(postData, new JsonSerializerOptions

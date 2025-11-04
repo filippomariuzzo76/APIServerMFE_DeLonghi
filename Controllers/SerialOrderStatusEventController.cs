@@ -60,7 +60,7 @@ namespace APIServerMFE_DeLonghi.Controllers
 
             // Logga il contenuto del payload come JSON
             string rawPayload = await new StreamReader(Request.Body).ReadToEndAsync();
-            _logger.LogInformation("Serial Order Status Raw Payload Recived: {RawPayload}", rawPayload);
+            _logger.LogInformation("Serial Order Status Raw Payload Received: {RawPayload}", rawPayload);
 
             EventSerialOrderPayload payload = null;
 
