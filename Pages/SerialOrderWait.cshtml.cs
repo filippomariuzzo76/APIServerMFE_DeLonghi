@@ -122,7 +122,7 @@ namespace APIServerMFE_DeLonghi.Pages
             _logger.LogInformation("Invio richiesta POST a serial-order con payload: {Payload}", json);
             _logger.LogInformation("Sto inviando x-api-key: {ApiKey}", _settings.XApiKey);
 
-            // qui uso il BaseAddress dal client nominato
+            // qui uso il BaseAddress dal client nominato 
             var response = await _httpClient.PostAsync("/api/v1/serial-order", content);
 
             if (!response.IsSuccessStatusCode)

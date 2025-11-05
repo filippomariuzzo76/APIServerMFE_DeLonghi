@@ -9,22 +9,22 @@ namespace APIServerMFE_DeLonghi.Events
      * 
      * 
      * ********************************************************************************/
-    public class ReaderBarcodeResultEventPayload
-    {
-        [JsonPropertyName("ReaderBarcodeResult Event")]
-        public ReaderBarcodeResultPayload ReaderBarcodeResultEvent { get; set; }
-    }
+    //public class ReaderBarcodeResultEventPayload
+    //{
+    //    [JsonPropertyName("ReaderBarcodeResult Event")]
+    //    public ReaderBarcodeResultPayload ReaderBarcodeResultEvent { get; set; }
+    //}
 
     /*****************************************************************************************
      * 
      * **************************************************************************************/
-    public class ReaderBarcodeResultPayload
+    public class ReaderBarcodeResultEventPayload
     {
         [JsonPropertyName("name")]
         public string Name { get; set; }
 
         [JsonPropertyName("payload")]
-        public Payload Payload { get; set; }
+        public PayloadData Payload { get; set; }
 
         [JsonPropertyName("robot-id")]
         public string RobotId { get; set; }
@@ -46,7 +46,7 @@ namespace APIServerMFE_DeLonghi.Events
     /*****************************************************************************************
      * 
      * **************************************************************************************/
-    public class Payload
+    public class PayloadData
     {
         [JsonPropertyName("plc1")]
         public string Plc1 { get; set; }
