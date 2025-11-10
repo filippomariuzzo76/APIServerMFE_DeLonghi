@@ -102,7 +102,7 @@ namespace APIServerMFE_DeLonghi.Controllers
                 StringBuilder readerBarcodeResultEventBuilder = new StringBuilder();
 
                 // Log o elaborazione dell'evento
-                readerBarcodeResultEventBuilder.AppendLine($"Event ReaderBarcodeResult riceived: Name: {payload.Name}, Plc1: {payload.Payload.Plc1}, Plc2: {payload.Payload.Plc2}");
+                readerBarcodeResultEventBuilder.AppendLine($"Event ReaderBarcodeResult riceived: Name: {payload.Name},TimeStamp: {payload.Timestamp}, SerialOrderId: {payload.SerialOrderId},RobotId: {payload.RobotId},Plc1: {payload.Payload.Plc1}, Plc2: {payload.Payload.Plc2}");
 
                 // Converti tutto in una singola stringa
                 string stringReaderBarcodeResultEventBuilder = readerBarcodeResultEventBuilder.ToString();
